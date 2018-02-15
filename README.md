@@ -14,7 +14,7 @@ This is the code repository accompanying the publication:
 We provide two pre-trained GAN models. The first one is trained on the Ketton limestone training image presented here
 If you decide to use this dataset for your own work, please consider citing the following works:
 
-*Stochastic reconstruction of an oolitic limestone by generative adversarial networks*[[ArXiv](https://arxiv.org/abs/1712.02854)]  
+*Stochastic reconstruction of an oolitic limestone by generative adversarial networks*[[ArXiv](https://arxiv.org/abs/1712.02854)]
 *Dynamic reservoir-condition microtomography of reactive transport in complex carbonates*[[Article](https://www.sciencedirect.com/science/article/pii/S0016703717300789)]
 
 Due to their size we provide the necessary files via a [Google Drive](https://drive.google.com/open?id=1qxicm3wzpvijUEpyI3pTm2QPF520SZAw)
@@ -29,8 +29,8 @@ Due to the stochastic nature of the optimization procedure the resulting images 
 
 We have trained a generative adversarial network on the Maules Creek alluvial aquifer training image.
 
-The required model checkpoints are included in this repository. If you choose to use the
-Maules Creek training image, please consider citing their originators at [trainingimages.org](www.trainingimages.org)
+The required model checkpoints are included in this repository.   
+If you choose to use the Maules Creek training image, please consider citing their originators at [trainingimages.org](www.trainingimages.org)
 
 #### Results
 
