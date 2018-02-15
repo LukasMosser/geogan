@@ -4,7 +4,7 @@
 [Martin J. Blunt](https://www.imperial.ac.uk/people/m.blunt)
 *Department of Earth Science and Engineering, Imperial College London*
 
-This is the code repository accompanying the publication:
+This is the code repository accompanying the publication:  
  *Conditioning of three-dimensional generative adversarial networks for pore and reservoir-scale models*
  [[ArXiv]()]
 
