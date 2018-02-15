@@ -4,7 +4,7 @@
 [Martin J. Blunt](https://www.imperial.ac.uk/people/m.blunt)
 *Department of Earth Science and Engineering, Imperial College London*
 
-This is the code repository accompanying the publication:  
+This is the code repository accompanying the publication:
  *Conditioning of three-dimensional generative adversarial networks for pore and reservoir-scale models*
  [[ArXiv]()]
 
@@ -60,7 +60,7 @@ We welcome contributions and suggestions for the improvement and development of 
 
 We recommend at least 16 GB of RAM and a modern CUDA capable NVIDIA graphics processor.
 All experiments apart from network training have been performed on an NVIDIA 960M.
-Training of the generative networks was performed on 8xNVIDIA K40 GPUs.
+Training of the generative networks was performed on 8xNVIDIA K40 GPUs.  
 
 ## Support
 
