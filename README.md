@@ -29,7 +29,7 @@ Due to the stochastic nature of the optimization procedure the resulting images 
 
 We have trained a generative adversarial network on the Maules Creek alluvial aquifer training image.
 
-The required model checkpoints are included in this repository.   
+The required model checkpoints are included in this repository.
 If you choose to use the Maules Creek training image, please consider citing their originators at [trainingimages.org](www.trainingimages.org)
 
 #### Results
@@ -37,6 +37,7 @@ If you choose to use the Maules Creek training image, please consider citing the
 ![Maules Creek](figures/fig_2.png)
 
 We have conditioned 1024 realizations of the Maules Creek alluvial aquifer model and present mean and standard deviation maps of the resulting ensemble.
+The resulting images show that each realization honors the data at the well exactly and an ellipsoidal region of influence can be observed.
 
 ## Requirements
 
