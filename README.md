@@ -1,7 +1,7 @@
 ## GeoGAN: Conditioning of three-dimensional generative adversarial networks for pore and reservoir-scale models
 *Authors*: [Lukas Mosser](mailto:lukas.mosser15@imperial.ac.uk),
 [Olivier Dubrule](https://www.imperial.ac.uk/people/o.dubrule),
-[Martin J. Blunt](https://www.imperial.ac.uk/people/m.blunt)
+[Martin J. Blunt](https://www.imperial.ac.uk/people/m.blunt)  
 *Department of Earth Science and Engineering, Imperial College London*
 
 This is the code repository accompanying the publication:
