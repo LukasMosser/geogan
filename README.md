@@ -17,7 +17,7 @@ Due to their size we provide the necessary files via a [Google Drive](https://dr
 
 #### Results
 
-![Ketton Conditioned](figures/figure_1_ketton.png){:height="250px"}.
+![Ketton Conditioned](figures/figure_1_ketton.png)
 
 The figure above shows two samples (b/c) obtained by a conditioning a generative adversarial network to three-orthogonal cross-sections of the Ketton training image(a).
 Due to the stochastic nature of the optimization procedure the resulting images have distinctly different features away from the conditioning data.
@@ -30,7 +30,7 @@ Maules Creek training image, please consider citing their originators at [traini
 
 #### Results
 
-![Maules Creek](figures/fig_2.png){:height="250px"}.
+![Maules Creek](figures/fig_2.png)
 
 We have conditioned 1024 realizations of the Maules Creek alluvial aquifer model and present mean and standard deviation maps of the resulting ensemble.
 
