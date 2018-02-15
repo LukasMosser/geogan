@@ -41,7 +41,7 @@ We have conditioned 1024 realizations of the Maules Creek alluvial aquifer model
 ## Requirements
 
 The conditioning tool is based on the following libraries:
-- Python 2.7
+- [Python 2.7](https://anaconda.org/)
 - [Pytorch 0.3](www.pytorch.org)
 - [Scikit-Learn](www.scikit-learn.org)
 - [tqdm](https://github.com/noamraph/tqdm)
