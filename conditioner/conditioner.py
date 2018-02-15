@@ -3,103 +3,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.optim as optim
 import numpy as np
-from sklearn.metrics import classification_report, f1_score
-
-class ConditioningData(object):
-    def __init__(self, data, mask, type="continuous"):
-        self.data = Variable(torch.from_numpy(np.array([np.expand_dims(data, 0)])).float())
-        self.mask = Variable(torch.from_numpy(np.array([np.expand_dims(mask, 0)])).float())
-
-        if self.use_cuda:
-            pass
-
-        self.masked_data = self.data * self.mask
-
-        self.type = type
-
-    def cuda(self):
-        self.data = self.data.cuda()
-        self.mask = self.mask.cuda()
-        self.masked_data = self.masked_data.cuda()
-
-class LatentSampler(object):
-    def __init__(self, batch_size, latent_size, latent_shape, distribution="normal", cuda=False):
-        self.latent_distribution = distribution
-        self.config = [batch_size, latent_size] + latent_shape
-        self.cuda = cuda
-
-    def sample(self):
-        zhat = None
-
-        if self.cuda:
-            zhat = Variable(torch.FloatTensor(*self.config).cuda(), requires_grad=True)
-        else:
-            zhat = Variable(torch.FloatTensor(*self.config), requires_grad=True)
-
-        zhat.retain_grad()
-
-        if self.latent_dist == "normal":
-            zhat.data = zhat.data.normal_(0, 1)
-        elif self.latent_dist == "uniform":
-            zhat.data = zhat.data.uniform_(-1, 1)
-
-        return zhat
-
-
-class GAN(object):
-    def __init__(self, discriminator, generator):
-        self.discriminator = discriminator
-        self.generator = generator
-
-    def cuda(self):
-        self.discriminator = self.discriminator.cuda()
-        self.generator = self.generator.cuda()
-
-    def freeze(self):
-        for p in self.discriminator.parameters():
-            p.requires_grad = False
-
-        for p in self.generator.parameters():
-            p.requires_grad = False
-
-class LossCollection(object):
-    def __init__(self):
-        pass
-
-
-class MSECriterion(object):
-    def __init__(self):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return torch.sum(torch.pow(args[0] - args[1], 2))
-
-class Criterion(object):
-    def __init__(self, loss_type="mse", perceptual=True):
-        self.loss_type = loss_type
-        self.perceptual = perceptual
-        self.criterion = self.get_criterion()
-
-    def get_criterion(self):
-        if self.loss_type == "bce":
-            return nn.BCELoss(weight=self.mask, size_average=False)
-        elif self.loss_type == "mse":
-            return MSECriterion()
-
-
-
-class GANConditioner(object):
-    def __init__(self, latent_sampler, gan, conditioning_data, conditioning_criterion, cuda=False):
-        self.latent_sampler = latent_sampler
-        self.gan = gan
-        self.conditioning_data = conditioning_data
-
-        self.cuda = cuda
-        if self.cuda:
-            self.gan.cuda()
-            self.conditioning_data.cuda()
-
-
+from sklearn.metrics import classification_report, f1_score, accuracy_score
 
 class Unconditional(object):
     def __init__(self, dimension, generator, latent_size, latent_dist, use_cuda=False):
@@ -138,7 +42,6 @@ class Unconditional(object):
             return xhat.data.cpu().numpy()
         except RuntimeError:
             print("Out of GPU Memory.")
-
 
 
 class Conditioner(object):
@@ -196,8 +99,9 @@ class Conditioner(object):
     def condition(self, batch, m, target):
         self.batch = batch
         self.m = m
+        self.target = target
         self.zhat = self.sample_batch(batch, m)
-        self.optimizer = optim.LBFGS([self.zhat])#, lr=1e-2, betas=(0.5, 0.9))#LBFGS([self.zhat])
+        self.optimizer = optim.LBFGS([self.zhat])
         self.perceptual_losses, self.content_losses, self.total_losses = [999999], [999999], [999999]
 
         self.conditioning_data = Variable(torch.from_numpy(np.array([np.expand_dims(self.conditioning_data, 0)]*self.batch)).float())
@@ -242,7 +146,7 @@ class Conditioner(object):
             perceptual = None
 
             if self.discriminator:
-                perceptual = self.discriminator(completed).mean()#*1e-2
+                perceptual = self.discriminator(completed).mean()
                 perceptual = (disc_real - perceptual).abs()
                 perceptual.backward(retain_graph=True)
 
@@ -254,85 +158,25 @@ class Conditioner(object):
             out = np.where((completed*0.5+0.5).data.cpu().numpy()[0, 0][:, 64, 64].reshape(-1) >= 0.5, 1., 0)
             bin_labels = self.conditioning_data.data.cpu().numpy()[0, 0][:, 64, 64].reshape(-1)
 
-            print classification_report(out, bin_labels)
+            if self.verbose:
+                print("Iteration: ", i, " Current accuracy: ", accuracy_score(out, bin_labels))
 
             percep_np, content_np, total_np = self.get_numpy_values([perceptual, content_loss, total_loss])
             self.append_losses([percep_np, content_np, total_np])
 
             if f1_score(out, bin_labels) == 1.0 and percep_np < 0.1:
-                print("DONE!!!!!")
+                print("Finished conditioning in ", i, " steps.")
                 break
 
-            if self.verbose:
-                print([percep_np, content_np, total_np])
             self.optimizer.step()
 
-            print(self.zhat.data.min(), self.zhat.data.max())
             if i == 50:
                 print("reducing lr")
                 self.optimizer = optim.Adam([self.zhat], lr=1e-4, betas=(0.5, 0.9))
 
         return i, percep_np, content_np, total_np, self.zhat
 
-    def condition_mse(self, batch, m, target):
-        self.batch = batch
-        self.m = m
-        self.zhat = self.sample_batch(batch, m)
-
-        self.optimizer = optim.Adam([self.zhat], lr=1e-1, betas=(0.5, 0.9))
-        self.perceptual_losses, self.content_losses, self.total_losses = [999999], [999999], [999999]
-
-        self.conditioning_data = Variable(torch.from_numpy(np.array([np.expand_dims(self.conditioning_data, 0)]*self.batch)).float())
-        self.mask = Variable(torch.from_numpy(np.array([np.expand_dims(self.mask, 0)]*self.batch)).float())
-
-        if self.use_cuda:
-            self.conditioning_data = self.conditioning_data.cuda()
-            self.mask = self.mask.cuda()
-
-        self.conditioning_masked = self.conditioning_data * self.mask
-
-        self.steps = 0
-        while self.content_losses[-1] > target:
-            #self.optimizer.step(self.closure)
-            print("Step: ", self.steps, " current loss: ", self.content_losses[-1], " target value: ", target)
-            self.optimizer.zero_grad()
-            print(self.zhat.data.min(), self.zhat.data.max())
-
-            completed = self.generator(self.zhat)
-
-            if self.is_binary:
-                completed.data = torch.sign(completed.data)
-
-            completed_masked = completed * self.mask
-
-            self.content_loss = torch.sum(torch.pow(self.conditioning_masked - completed_masked, 2))
-
-            #mone = torch.FloatTensor([1]) * -1
-            #if self.use_cuda:
-            #    mone = mone.cuda()
-
-            if self.discriminator:
-                self.perceptual = self.discriminator(completed).mean() * 1e-2
-
-            self.total_loss = self.content_loss
-            if self.discriminator:
-                self.total_loss = self.content_loss - self.perceptual
-
-            self.total_loss.backward(retain_graph=True)
-
-            percep_np, content_np, total_np = self.get_numpy_values(
-                [-self.perceptual, self.content_loss, self.total_loss])
-            self.append_losses([percep_np, content_np, total_np])
-            self.optimizer.step()
-
-            if self.steps == 50:
-                print("reducing lr")
-                self.optimizer = optim.Adam([self.zhat], lr=1e-4, betas=(0.5, 0.9))
-            self.steps += 1
-        return self.steps, percep_np, content_np, total_np, self.zhat
-
     def closure(self):
-        print(self.zhat.data.min(), self.zhat.data.max())
         self.optimizer.zero_grad()
         completed = self.generator(self.zhat)
 
@@ -361,8 +205,12 @@ class Conditioner(object):
             self.tensorboard.add_scalar(scalar_value=total_np, tag="Total Loss", global_step=self.count[0])
 
         if self.verbose:
-            print([percep_np, content_np, total_np])
-
+            print("Iteration: ", self.count[0],
+                  "Current MSE: %.1f" % float(content_np),
+                  " Current Perceptual Loss: %.3f" %float(percep_np),
+                  " Current Total Loss: %.3f" %float(total_np),
+                  " Target MSE: %.2f"%self.target
+                  )
         self.count[0] += 1
 
         return self.total_loss
