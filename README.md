@@ -6,7 +6,7 @@
 
 This is the code repository accompanying the publication:  
  *Conditioning of three-dimensional generative adversarial networks for pore and reservoir-scale models*
- [[ArXiv]()]
+ [[ArXiv](http://arxiv.org/abs/1802.05622)]
 
 ## Datasets and pre-trained models
 
